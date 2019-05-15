@@ -67,6 +67,9 @@ public class RaycastController : MonoBehaviour
         public float slopeAngle, slopeAngleOld;
 
         public Vector3 velocityOld;
+        public int faceDir;
+
+        public bool fallingThroughPlatform;
 
         public void Reset()
         {
@@ -75,6 +78,8 @@ public class RaycastController : MonoBehaviour
             climbingSlope = descdendingSlope = false;
             slopeAngleOld = slopeAngle;
             slopeAngle = 0;
+            faceDir = 1;
+            fallingThroughPlatform = false;
         }
     }
 }

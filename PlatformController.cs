@@ -12,7 +12,7 @@ public class PlatformController : RaycastController
     public float platformSpeed;
     public bool isCyclic;
     public float waitTime;
-    [Range(0,2)]
+    [Range(0, 2)]
     public float platformEaseValue;
 
     int fromWaypointIndex;
@@ -26,7 +26,7 @@ public class PlatformController : RaycastController
     {
         base.Start();
         globalWaypoints = new Vector3[localWaypoints.Length];
-        for(int i=0; i<localWaypoints.Length; i++)
+        for (int i = 0; i < localWaypoints.Length; i++)
         {
             globalWaypoints[i] = localWaypoints[i] + transform.position;
         }
@@ -48,12 +48,12 @@ public class PlatformController : RaycastController
     float EasePlatform(float x)
     {
         float a = platformEaseValue + 1;
-        return Mathf.Pow(x,a) / (Mathf.Pow(x,a) + Mathf.Pow(1-x,a));
+        return Mathf.Pow(x, a) / (Mathf.Pow(x, a) + Mathf.Pow(1 - x, a));
     }
 
     Vector3 CalculatePlatformMovement()
     {
-        if(Time.time < nextMoveTime)
+        if (Time.time < nextMoveTime)
         {
             return Vector3.zero;
         }
@@ -67,7 +67,7 @@ public class PlatformController : RaycastController
 
         Vector3 newPos = Vector3.Lerp(globalWaypoints[fromWaypointIndex], globalWaypoints[toWayPointIndex], easedPercentBetweenWaypoints);
 
-        if(percentBetweenWaypoints >= 1)
+        if (percentBetweenWaypoints >= 1)
         {
             percentBetweenWaypoints = 0;
             fromWaypointIndex++;
@@ -85,14 +85,15 @@ public class PlatformController : RaycastController
         return newPos - transform.position;
     }
 
-    void MovePassengers(bool beforeMovePlatform) {
-        foreach(PassengerMovement passenger in passengerMovement)
+    void MovePassengers(bool beforeMovePlatform)
+    {
+        foreach (PassengerMovement passenger in passengerMovement)
         {
             if (!passengerDictionary.ContainsKey(passenger.transform))
             {
                 passengerDictionary.Add(passenger.transform, passenger.transform.GetComponent<Controller2D>());
             }
-            if(passenger.moveBeforePlatform == beforeMovePlatform)
+            if (passenger.moveBeforePlatform == beforeMovePlatform)
             {
                 passengerDictionary[passenger.transform].Move(passenger.velocity, passenger.standingOnPlatform);
             }
@@ -119,7 +120,7 @@ public class PlatformController : RaycastController
                 rayOrigin += Vector2.right * (verticalRaySpacing * i + velocity.x);
                 RaycastHit2D hit = Physics2D.Raycast(rayOrigin, Vector2.up * directionY, rayLength, passengerMask);
 
-                if (hit)
+                if (hit && hit.distance != 0)
                 {
                     // makes it so each passenger is only moved 1 time per frame, if there are multiple passengers
                     if (!movedPassengers.Contains(hit.transform))
@@ -146,7 +147,7 @@ public class PlatformController : RaycastController
                 rayOrigin += Vector2.up * (horizontalRaySpacing * i);
                 RaycastHit2D hit = Physics2D.Raycast(rayOrigin, Vector2.right * directionX, rayLength, passengerMask);
 
-                if (hit)
+                if (hit && hit.distance != 0)
                 {
                     // makes it so each passenger is only moved 1 time per frame, if there are multiple passengers
                     if (!movedPassengers.Contains(hit.transform))
@@ -162,7 +163,7 @@ public class PlatformController : RaycastController
         }
 
         // passenger on top of horizontally or down moving platform
-        if(directionY == -1 || (velocity.y == 0 && velocity.x != 0))
+        if (directionY == -1 || (velocity.y == 0 && velocity.x != 0))
         {
             float rayLength = 2 * skinWidth;
 
@@ -171,7 +172,7 @@ public class PlatformController : RaycastController
                 Vector2 rayOrigin = raycastOrigins.topLeft + Vector2.right * (verticalRaySpacing * i + velocity.x);
                 RaycastHit2D hit = Physics2D.Raycast(rayOrigin, Vector2.up, rayLength, passengerMask);
 
-                if (hit)
+                if (hit && hit.distance != 0)
                 {
                     // makes it so each passenger is only moved 1 time per frame, if there are multiple passengers
                     if (!movedPassengers.Contains(hit.transform))
@@ -207,14 +208,14 @@ public class PlatformController : RaycastController
 
     private void OnDrawGizmos()
     {
-        if(localWaypoints != null)
+        if (localWaypoints != null)
         {
             Gizmos.color = Color.red;
             float size = .3f;
 
-            for(int i=0; i < localWaypoints.Length; i++)
+            for (int i = 0; i < localWaypoints.Length; i++)
             {
-                Vector3 globalWaypointPos = (Application.isPlaying)?globalWaypoints[i] : localWaypoints[i] + transform.position;
+                Vector3 globalWaypointPos = (Application.isPlaying) ? globalWaypoints[i] : localWaypoints[i] + transform.position;
                 Gizmos.DrawLine(globalWaypointPos - Vector3.up * size, globalWaypointPos + Vector3.up * size);
                 Gizmos.DrawLine(globalWaypointPos - Vector3.left * size, globalWaypointPos + Vector3.left * size);
             }

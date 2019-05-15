@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-[RequireComponent( typeof (Controller2D))]
+[RequireComponent(typeof(Controller2D))]
 public class Player : MonoBehaviour
 {
     public float moveSpeed = 6;
@@ -41,26 +41,25 @@ public class Player : MonoBehaviour
     private void Update()
     {
         Vector2 input = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
-        int wallDirX = (controller.collisions.left) ? -1 : 1;
+        int wallDirX = (controller.collisions.left)? -1 : 1;
 
         float targetVelocityX = input.x * moveSpeed;
         velocity.x = Mathf.SmoothDamp(velocity.x, targetVelocityX, ref velocityXSmoothing, (controller.collisions.below) ? accelerationTimeGrounded : accelerationTimeAirborne);
 
         bool wallSliding = false;
-        if((controller.collisions.left || controller.collisions.right) && !controller.collisions.below && velocity.y < 0)
+        if ((controller.collisions.left || controller.collisions.right) && !controller.collisions.below && velocity.y < 0)
         {
-            //print("velocity X = " + velocity.x);
             wallSliding = true;
-            if(velocity.y < -wallSlideSpeedMax)
+            if (velocity.y < -wallSlideSpeedMax)
             {
                 velocity.y = -wallSlideSpeedMax;
             }
 
-            if(timeToWallUnstick > 0)
+            if (timeToWallUnstick > 0)
             {
                 velocityXSmoothing = 0;
                 velocity.x = 0;
-                if(input.x != wallDirX && input.x != 0)
+                if (input.x != wallDirX && input.x != 0)
                 {
                     timeToWallUnstick -= Time.deltaTime;
                 }
@@ -75,22 +74,16 @@ public class Player : MonoBehaviour
             }
         }
 
-        if(controller.collisions.above || controller.collisions.below)
-        {
-            velocity.y = 0;
-        }
-
-
         if (Input.GetKeyDown(KeyCode.Space))
         {
             if (wallSliding)
             {
-                if(wallDirX == input.x)
+                if (wallDirX == input.x)
                 {
                     velocity.x = -wallDirX * wallJumpClimb.x;
                     velocity.y = wallJumpClimb.y;
                 }
-                else if(input.x == 0)
+                else if (input.x == 0)
                 {
                     velocity.x = -wallDirX * wallJumpOff.x;
                     velocity.y = wallJumpOff.y;
@@ -128,6 +121,11 @@ public class Player : MonoBehaviour
         }
 
         velocity.y += gravity * Time.deltaTime;
-        controller.Move(velocity * Time.deltaTime);
+        controller.Move(velocity * Time.deltaTime, input);
+
+        if (controller.collisions.above || controller.collisions.below)
+        {
+            velocity.y = 0;
+        }
     }
 }

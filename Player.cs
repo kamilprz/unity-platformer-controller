@@ -151,7 +151,7 @@ public class Player : MonoBehaviour
             {
                 velocityXSmoothing = 0;
                 velocity.x = 0;
-                if (directionalInput.x != wallDirX && directionalInput.x != 0)
+                if ((directionalInput.x != wallDirX) && (directionalInput.x != 0))
                 {
                     timeToWallUnstick -= Time.deltaTime;
                 }

@@ -268,7 +268,6 @@ public class Controller2D : RaycastController
             climbingSlope = descdendingSlope = false;
             slopeAngleOld = slopeAngle;
             slopeAngle = 0;
-            faceDir = 1;
             fallingThroughPlatform = false;
         }
     }

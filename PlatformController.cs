@@ -6,7 +6,9 @@ public class PlatformController : RaycastController
 {
     public LayerMask passengerMask;
 
+    // positions relative to the platform
     public Vector3[] localWaypoints;
+    // positions in the world
     Vector3[] globalWaypoints;
 
     public float platformSpeed;
@@ -25,6 +27,7 @@ public class PlatformController : RaycastController
     public override void Start()
     {
         base.Start();
+        // make local waypoints global
         globalWaypoints = new Vector3[localWaypoints.Length];
         for (int i = 0; i < localWaypoints.Length; i++)
         {
@@ -47,12 +50,15 @@ public class PlatformController : RaycastController
 
     float EasePlatform(float x)
     {
+        // uses a formula from Sebastian Lague's video
+        // easing makes the platform speed up and then slow down at different rates basically
         float a = platformEaseValue + 1;
         return Mathf.Pow(x, a) / (Mathf.Pow(x, a) + Mathf.Pow(1 - x, a));
     }
 
     Vector3 CalculatePlatformMovement()
     {
+        // wait time for the platform at waypoint
         if (Time.time < nextMoveTime)
         {
             return Vector3.zero;
@@ -61,12 +67,17 @@ public class PlatformController : RaycastController
         fromWaypointIndex %= globalWaypoints.Length;
         int toWayPointIndex = (fromWaypointIndex + 1) % globalWaypoints.Length;
         float distanceBetweenWaypoints = Vector3.Distance(globalWaypoints[fromWaypointIndex], globalWaypoints[toWayPointIndex]);
+
+        // percent between 0 and 1 - shows how much you've moved from one waypoint to the next
         percentBetweenWaypoints += Time.deltaTime * platformSpeed / distanceBetweenWaypoints;
         percentBetweenWaypoints = Mathf.Clamp01(percentBetweenWaypoints);
+
         float easedPercentBetweenWaypoints = EasePlatform(percentBetweenWaypoints);
 
+        // find the point between fromWaypoint and toWaypoint based on the percentage
         Vector3 newPos = Vector3.Lerp(globalWaypoints[fromWaypointIndex], globalWaypoints[toWayPointIndex], easedPercentBetweenWaypoints);
 
+        // reached next waypoint
         if (percentBetweenWaypoints >= 1)
         {
             percentBetweenWaypoints = 0;
@@ -74,8 +85,10 @@ public class PlatformController : RaycastController
 
             if (!isCyclic)
             {
+                // reached end of array
                 if (fromWaypointIndex >= globalWaypoints.Length - 1)
                 {
+                    // move back through array
                     fromWaypointIndex = 0;
                     System.Array.Reverse(globalWaypoints);
                 }
@@ -206,6 +219,7 @@ public class PlatformController : RaycastController
         }
     }
 
+    // draws all the platform waypoints
     private void OnDrawGizmos()
     {
         if (localWaypoints != null)
@@ -215,6 +229,7 @@ public class PlatformController : RaycastController
 
             for (int i = 0; i < localWaypoints.Length; i++)
             {
+                // if application playing display global waypoints, if not display local
                 Vector3 globalWaypointPos = (Application.isPlaying) ? globalWaypoints[i] : localWaypoints[i] + transform.position;
                 Gizmos.DrawLine(globalWaypointPos - Vector3.up * size, globalWaypointPos + Vector3.up * size);
                 Gizmos.DrawLine(globalWaypointPos - Vector3.left * size, globalWaypointPos + Vector3.left * size);

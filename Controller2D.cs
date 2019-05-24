@@ -10,6 +10,7 @@ public class Controller2D : RaycastController
     [HideInInspector]
     public Vector2 playerInput;
     public CollisionInfo collisions;
+    // for the platforms
     string jumpThroughTag = "canJumpThrough";
 
     // when this is called, calls RaycastController's Start and then continues with its own
@@ -61,6 +62,7 @@ public class Controller2D : RaycastController
     void HorizontalCollisions(ref Vector2 velocity)
     {
         float directionX = collisions.faceDir;
+        print("directionX: " + directionX);
         float rayLength = Mathf.Abs(velocity.x) + skinWidth;
 
         if (Mathf.Abs(velocity.x) < skinWidth)

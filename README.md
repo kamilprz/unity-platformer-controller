@@ -1,2 +1,2 @@
 # Unity
-game design scripts
+game design scripts for a 2D action platformer

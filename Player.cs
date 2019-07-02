@@ -13,12 +13,12 @@ public class Player : MonoBehaviour
     public float accelerationTimeAirborne = .2f;
     public float accelerationTimeGrounded = .1f;
 
-    bool doubleJump;
+    //bool doubleJump;
     float gravity;
     float jumpVelocity;
     float velocityXSmoothing;
 
-    Vector3 velocity;
+    Vector2 velocity;
     Controller2D controller;
     Vector2 directionalInput;
 
@@ -90,29 +90,29 @@ public class Player : MonoBehaviour
                 velocity.y = wallLeap.y;
             }
         }
-        else
+        //else
+        //{
+        if (controller.collisions.below)
         {
-            if (controller.collisions.below)
-            {
-                velocity.y = jumpVelocity;
-                doubleJump = true;
-            }
-            else if (doubleJump)
-            {
-                doubleJump = false;
-                velocity.y = jumpVelocity;
-            }
+            velocity.y = jumpVelocity;
+            //doubleJump = true;
         }
+        //else if (doubleJump)
+        //{
+        //    doubleJump = false;
+        //    velocity.y = jumpVelocity;
+        //}
+        //}
     }
 
     public void FastFall()
     {
-            if (!controller.collisions.below)
-            {
-                // add boolean so can only do it once
-                wallSliding = false;
-                velocity.y = -1.5f * jumpVelocity;
-            }
+        if (!controller.collisions.below)
+        {
+            // add boolean so can only do it once
+            wallSliding = false;
+            velocity.y = -1.5f * jumpVelocity;
+        }
     }
 
     public void Dash()

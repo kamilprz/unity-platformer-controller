@@ -36,10 +36,11 @@ public class cameraTrack : MonoBehaviour
         Vector2 focusPosition = focusArea.centre + Vector2.up * verticalOffset;
 
         // if focusArea changed X position
-        if(focusArea.velocity.x != 0)
+        if (focusArea.velocity.x != 0)
         {
             lookAheadDirX = Mathf.Sign(focusArea.velocity.x);
-            if (Mathf.Sign(target.playerInput.x) == Mathf.Sign(focusArea.velocity.x) && target.playerInput.x != 0) {
+            if (Mathf.Sign(target.playerInput.x) == Mathf.Sign(focusArea.velocity.x) && target.playerInput.x != 0)
+            {
                 lookAheadStopped = false;
                 targetLookAheadX = lookAheadDirX * lookAheadDistX;
             }
@@ -97,7 +98,7 @@ public class cameraTrack : MonoBehaviour
                 shiftX = targetBounds.min.x - left;
             }
             // if player has moved out of focusArea to the right
-            else if(targetBounds.max.x > right)
+            else if (targetBounds.max.x > right)
             {
                 shiftX = targetBounds.max.x - right;
             }

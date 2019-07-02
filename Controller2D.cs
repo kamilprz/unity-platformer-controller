@@ -256,7 +256,7 @@ public class Controller2D : RaycastController
         public bool climbingSlope, descdendingSlope;
         public float slopeAngle, slopeAngleOld;
 
-        public Vector3 moveAmountOld;
+        public Vector2 moveAmountOld;
         public int faceDir;
 
         public bool fallingThroughPlatform;

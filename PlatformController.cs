@@ -7,9 +7,9 @@ public class PlatformController : RaycastController
     public LayerMask passengerMask;
 
     // positions relative to the platform
-    public Vector3[] localWaypoints;
+    public Vector2[] localWaypoints;
     // positions in the world
-    Vector3[] globalWaypoints;
+    Vector2[] globalWaypoints;
 
     public float platformSpeed;
     public bool isCyclic;
@@ -28,10 +28,10 @@ public class PlatformController : RaycastController
     {
         base.Start();
         // make local waypoints global
-        globalWaypoints = new Vector3[localWaypoints.Length];
+        globalWaypoints = new Vector2[localWaypoints.Length];
         for (int i = 0; i < localWaypoints.Length; i++)
         {
-            globalWaypoints[i] = localWaypoints[i] + transform.position;
+            globalWaypoints[i] = localWaypoints[i] + (Vector2)transform.position;
         }
     }
 
@@ -39,7 +39,7 @@ public class PlatformController : RaycastController
     void Update()
     {
         UpdateRaycastOrigins();
-        Vector3 velocity = CalculatePlatformMovement();
+        Vector2 velocity = CalculatePlatformMovement();
 
         CalculatePassengerMovement(velocity);
 
@@ -56,17 +56,17 @@ public class PlatformController : RaycastController
         return Mathf.Pow(x, a) / (Mathf.Pow(x, a) + Mathf.Pow(1 - x, a));
     }
 
-    Vector3 CalculatePlatformMovement()
+    Vector2 CalculatePlatformMovement()
     {
         // wait time for the platform at waypoint
         if (Time.time < nextMoveTime)
         {
-            return Vector3.zero;
+            return Vector2.zero;
         }
 
         fromWaypointIndex %= globalWaypoints.Length;
         int toWayPointIndex = (fromWaypointIndex + 1) % globalWaypoints.Length;
-        float distanceBetweenWaypoints = Vector3.Distance(globalWaypoints[fromWaypointIndex], globalWaypoints[toWayPointIndex]);
+        float distanceBetweenWaypoints = Vector2.Distance(globalWaypoints[fromWaypointIndex], globalWaypoints[toWayPointIndex]);
 
         // percent between 0 and 1 - shows how much you've moved from one waypoint to the next
         percentBetweenWaypoints += Time.deltaTime * platformSpeed / distanceBetweenWaypoints;
@@ -75,7 +75,7 @@ public class PlatformController : RaycastController
         float easedPercentBetweenWaypoints = EasePlatform(percentBetweenWaypoints);
 
         // find the point between fromWaypoint and toWaypoint based on the percentage
-        Vector3 newPos = Vector3.Lerp(globalWaypoints[fromWaypointIndex], globalWaypoints[toWayPointIndex], easedPercentBetweenWaypoints);
+        Vector2 newPos = Vector2.Lerp(globalWaypoints[fromWaypointIndex], globalWaypoints[toWayPointIndex], easedPercentBetweenWaypoints);
 
         // reached next waypoint
         if (percentBetweenWaypoints >= 1)
@@ -95,7 +95,7 @@ public class PlatformController : RaycastController
             }
             nextMoveTime = Time.time + waitTime;
         }
-        return newPos - transform.position;
+        return newPos - (Vector2)transform.position;
     }
 
     void MovePassengers(bool beforeMovePlatform)
@@ -114,7 +114,7 @@ public class PlatformController : RaycastController
     }
 
     //passenger being anything moved by platform
-    void CalculatePassengerMovement(Vector3 velocity)
+    void CalculatePassengerMovement(Vector2 velocity)
     {
         // stores all the moved passengers per frame, to avoid one passenger being moved multiple times
         HashSet<Transform> movedPassengers = new HashSet<Transform>();
@@ -143,7 +143,7 @@ public class PlatformController : RaycastController
                         float pushX = (directionY == 1) ? velocity.x : 0;
                         float pushY = velocity.y - (hit.distance - skinWidth) * directionY;
 
-                        passengerMovement.Add(new PassengerMovement(hit.transform, new Vector3(pushX, pushY), directionY == 1, true));
+                        passengerMovement.Add(new PassengerMovement(hit.transform, new Vector2(pushX, pushY), directionY == 1, true));
                     }
                 }
             }
@@ -170,7 +170,7 @@ public class PlatformController : RaycastController
                         float pushX = velocity.x - (hit.distance - skinWidth) * directionX;
                         float pushY = -skinWidth;
 
-                        passengerMovement.Add(new PassengerMovement(hit.transform, new Vector3(pushX, pushY), false, true));
+                        passengerMovement.Add(new PassengerMovement(hit.transform, new Vector2(pushX, pushY), false, true));
                     }
                 }
             }
@@ -195,7 +195,7 @@ public class PlatformController : RaycastController
                         float pushX = velocity.x;
                         float pushY = velocity.y;
 
-                        passengerMovement.Add(new PassengerMovement(hit.transform, new Vector3(pushX, pushY), true, false));
+                        passengerMovement.Add(new PassengerMovement(hit.transform, new Vector2(pushX, pushY), true, false));
                     }
                 }
             }
@@ -206,11 +206,11 @@ public class PlatformController : RaycastController
     struct PassengerMovement
     {
         public Transform transform;
-        public Vector3 velocity;
+        public Vector2 velocity;
         public bool standingOnPlatform;
         public bool moveBeforePlatform;
 
-        public PassengerMovement(Transform transform, Vector3 velocity, bool standingOnPlatform, bool moveBeforePlatform)
+        public PassengerMovement(Transform transform, Vector2 velocity, bool standingOnPlatform, bool moveBeforePlatform)
         {
             this.transform = transform;
             this.velocity = velocity;
@@ -230,9 +230,9 @@ public class PlatformController : RaycastController
             for (int i = 0; i < localWaypoints.Length; i++)
             {
                 // if application playing display global waypoints, if not display local
-                Vector3 globalWaypointPos = (Application.isPlaying) ? globalWaypoints[i] : localWaypoints[i] + transform.position;
-                Gizmos.DrawLine(globalWaypointPos - Vector3.up * size, globalWaypointPos + Vector3.up * size);
-                Gizmos.DrawLine(globalWaypointPos - Vector3.left * size, globalWaypointPos + Vector3.left * size);
+                Vector2 globalWaypointPos = (Application.isPlaying) ? globalWaypoints[i] : localWaypoints[i] + (Vector2)transform.position;
+                Gizmos.DrawLine(globalWaypointPos - Vector2.up * size, globalWaypointPos + Vector2.up * size);
+                Gizmos.DrawLine(globalWaypointPos - Vector2.left * size, globalWaypointPos + Vector2.left * size);
             }
         }
     }

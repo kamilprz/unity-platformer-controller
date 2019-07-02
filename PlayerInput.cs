@@ -29,7 +29,7 @@ public class PlayerInput : MonoBehaviour
         {
             player.FastFall();
         }
-        if (Input.GetKeyDown(KeyCode.LeftAlt))
+        if (Input.GetKeyDown(KeyCode.LeftShift))
         {
             player.Dash();
         }

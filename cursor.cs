@@ -11,6 +11,7 @@ public class cursor : MonoBehaviour
     void Update()
     {   
         Vector2 pos;
+        Cursor.visible = false;
         pos = cam.ScreenToWorldPoint(Input.mousePosition);
         cur.transform.position = pos;
     }

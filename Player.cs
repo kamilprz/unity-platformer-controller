@@ -12,6 +12,7 @@ public class Player : MonoBehaviour
     // used in smoothdamp
     public float accelerationTimeAirborne = .2f;
     public float accelerationTimeGrounded = .1f;
+    float oldAccelerationTimeGrounded;
 
     //bool doubleJump;
     float gravity;
@@ -38,19 +39,32 @@ public class Player : MonoBehaviour
     // DASH
     public float dashVariable = 28;
     bool dashedMidAir;
+    bool isDashing;
+
+    //timer
+    float counter;
+    [SerializeField] float counterMax = 1;
+
+    //grappleHook
+    grappleHook grapple;
 
 
     // MAIN PROGRAM
     private void Start()
     {
         controller = GetComponent<Controller2D>();
+        grapple = GetComponent<grappleHook>();
 
         gravity = -(2 * jumpHeight) / Mathf.Pow(timeToReachApex, 2);
         jumpVelocity = Mathf.Abs(gravity) * timeToReachApex;
+        isDashing = false;
+        oldAccelerationTimeGrounded = accelerationTimeGrounded;
     }
 
     void Update()
     {
+        counter = +1 * Time.deltaTime;
+
         CalculateVelocity();
         HandleWallSliding();
 
@@ -63,6 +77,16 @@ public class Player : MonoBehaviour
         {
             dashedMidAir = false;
         }
+
+        /*if (grapple.isGrappling) {
+            print("isGrappling in Player script");
+            if (controller.collisions.below || controller.collisions.above || controller.collisions.left || controller.collisions.right) {
+                velocity.x = 0;
+                velocity.y = 0;
+                grapple.isGrappling = false;
+                print("collision detected");
+            }
+        }*/
     }
 
     public void SetDirectionalInput(Vector2 input)
@@ -117,19 +141,31 @@ public class Player : MonoBehaviour
 
     public void Dash()
     {
+        isDashing = true;
         if (!dashedMidAir)
         {
             if (!controller.collisions.below)
             {
                 dashedMidAir = true;
             }
-            velocity.x = directionalInput.x * moveSpeed * dashVariable;
+            velocity.x = directionalInput.x * dashVariable;
         }
     }
 
     void CalculateVelocity()
     {
         float targetVelocityX = directionalInput.x * moveSpeed;
+        if (isDashing)
+        {
+            counter = 0;
+            oldAccelerationTimeGrounded = accelerationTimeGrounded;
+            accelerationTimeGrounded = accelerationTimeAirborne;
+            isDashing = false;
+        }
+        if (counter >= counterMax) {
+            accelerationTimeGrounded = oldAccelerationTimeGrounded;
+        }
+
         velocity.x = Mathf.SmoothDamp(velocity.x, targetVelocityX, ref velocityXSmoothing, (controller.collisions.below) ? accelerationTimeGrounded : accelerationTimeAirborne);
         velocity.y += gravity * Time.deltaTime;
     }
@@ -139,7 +175,7 @@ public class Player : MonoBehaviour
         wallDirX = (controller.collisions.left) ? -1 : 1;
         //print("wallDirX: " + wallDirX);
         wallSliding = false;
-        if ((controller.collisions.left || controller.collisions.right) && !controller.collisions.below && velocity.y < 0)
+        if ((controller.collisions.left || controller.collisions.right) && !controller.collisions.below && velocity.y < 0 && directionalInput.x!=0)
         {
             wallSliding = true;
             if (velocity.y < -wallSlideSpeedMax)

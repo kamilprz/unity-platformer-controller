@@ -43,17 +43,13 @@ public class Player : MonoBehaviour
 
     //timer
     float counter;
-    [SerializeField] float counterMax = 1;
-
-    //grappleHook
-    grappleHook grapple;
+    [SerializeField]float counterMax;
 
 
     // MAIN PROGRAM
     private void Start()
     {
         controller = GetComponent<Controller2D>();
-        grapple = GetComponent<grappleHook>();
 
         gravity = -(2 * jumpHeight) / Mathf.Pow(timeToReachApex, 2);
         jumpVelocity = Mathf.Abs(gravity) * timeToReachApex;
@@ -77,16 +73,6 @@ public class Player : MonoBehaviour
         {
             dashedMidAir = false;
         }
-
-        /*if (grapple.isGrappling) {
-            print("isGrappling in Player script");
-            if (controller.collisions.below || controller.collisions.above || controller.collisions.left || controller.collisions.right) {
-                velocity.x = 0;
-                velocity.y = 0;
-                grapple.isGrappling = false;
-                print("collision detected");
-            }
-        }*/
     }
 
     public void SetDirectionalInput(Vector2 input)

@@ -42,8 +42,17 @@ public class Player : MonoBehaviour
     bool isDashing;
 
     //timer
-    float counter;
+    [SerializeField] float counter;
     [SerializeField]float counterMax;
+
+    //grappling
+    RaycastHit2D hit;
+    public LayerMask mask;
+    public bool isGrappling;
+    Vector2 targetPos;
+    [SerializeField] float maxDistance = 50f;
+    float grappleAngle;
+    [SerializeField] float grappleSpeed = 2.25f;
 
 
     // MAIN PROGRAM
@@ -57,22 +66,32 @@ public class Player : MonoBehaviour
         oldAccelerationTimeGrounded = accelerationTimeGrounded;
     }
 
+   
+
     void Update()
     {
-        counter = +1 * Time.deltaTime;
-
+        counter += 1 * Time.deltaTime;
+       
         CalculateVelocity();
         HandleWallSliding();
-
+        
         controller.Move(velocity * Time.deltaTime, directionalInput);
         if (controller.collisions.above || controller.collisions.below)
         {
             velocity.y = 0;
+            isGrappling = false;
         }
         if (controller.collisions.below)
         {
             dashedMidAir = false;
         }
+        if (isGrappling && (controller.collisions.left || controller.collisions.right)) {
+            isGrappling = false;
+            velocity.x = 0;
+            velocity.y = 0;
+        }
+
+        Debug.Log(isGrappling);
     }
 
     public void SetDirectionalInput(Vector2 input)
@@ -138,21 +157,62 @@ public class Player : MonoBehaviour
         }
     }
 
-    void CalculateVelocity()
+    public void Grapple()
     {
-        float targetVelocityX = directionalInput.x * moveSpeed;
-        if (isDashing)
+        targetPos = (Vector2)Camera.main.ScreenToWorldPoint(Input.mousePosition);
+        hit = Physics2D.Raycast(transform.position, targetPos - (Vector2)transform.position, maxDistance, mask);
+        if (hit)
         {
-            counter = 0;
-            oldAccelerationTimeGrounded = accelerationTimeGrounded;
-            accelerationTimeGrounded = accelerationTimeAirborne;
-            isDashing = false;
+            if (Vector2.Distance(transform.position, hit.point) >= 2.35)
+            {
+                isGrappling = true;
+            }
         }
-        if (counter >= counterMax) {
-            accelerationTimeGrounded = oldAccelerationTimeGrounded;
-        }
+        
+        if (isGrappling)
+        {   
+            if (hit.point.x > transform.position.x)
+            {
+                directionalInput.x = 1;
+            }
 
-        velocity.x = Mathf.SmoothDamp(velocity.x, targetVelocityX, ref velocityXSmoothing, (controller.collisions.below) ? accelerationTimeGrounded : accelerationTimeAirborne);
+            if (hit.point.x < transform.position.x)
+            {
+                directionalInput.x = -1;
+            }
+
+            grappleAngle = Mathf.Atan2(hit.point.y - transform.position.y, hit.point.x - transform.position.x);
+
+            velocity.x = grappleSpeed * Mathf.Cos(grappleAngle);
+            velocity.y = (grappleSpeed * Mathf.Sin(grappleAngle)) - (gravity * Time.deltaTime);
+
+        }
+        if (Vector2.Distance(transform.position, hit.point) <= 2.35)
+        {
+            isGrappling = false;
+        }
+    }
+
+        void CalculateVelocity()
+    {
+        if (!isGrappling)
+        {
+            float targetVelocityX = directionalInput.x * moveSpeed;
+
+            if (isDashing)
+            {
+                counter = 0;
+                oldAccelerationTimeGrounded = accelerationTimeGrounded;
+                accelerationTimeGrounded = accelerationTimeAirborne;
+                isDashing = false;
+            }
+            if (counter >= counterMax)
+            {
+                accelerationTimeGrounded = oldAccelerationTimeGrounded;
+            }
+
+            velocity.x = Mathf.SmoothDamp(velocity.x, targetVelocityX, ref velocityXSmoothing, (controller.collisions.below) ? accelerationTimeGrounded : accelerationTimeAirborne);
+        }
         velocity.y += gravity * Time.deltaTime;
     }
 
@@ -164,28 +224,30 @@ public class Player : MonoBehaviour
         if ((controller.collisions.left || controller.collisions.right) && !controller.collisions.below && velocity.y < 0 && directionalInput.x!=0)
         {
             wallSliding = true;
-            if (velocity.y < -wallSlideSpeedMax)
-            {
-                velocity.y = -wallSlideSpeedMax;
-            }
-
-            if (timeToWallUnstick > 0)
-            {
-                velocityXSmoothing = 0;
-                velocity.x = 0;
-                if ((directionalInput.x != wallDirX) && (directionalInput.x != 0))
+           
+                if (velocity.y < -wallSlideSpeedMax)
                 {
-                    timeToWallUnstick -= Time.deltaTime;
+                    velocity.y = -wallSlideSpeedMax;
+                }
+
+                if (timeToWallUnstick > 0)
+                {
+                    velocityXSmoothing = 0;
+                    velocity.x = 0;
+                    if ((directionalInput.x != wallDirX) && (directionalInput.x != 0))
+                    {
+                        timeToWallUnstick -= Time.deltaTime;
+                    }
+                    else
+                    {
+                        timeToWallUnstick = wallStickTime;
+                    }
                 }
                 else
                 {
                     timeToWallUnstick = wallStickTime;
                 }
-            }
-            else
-            {
-                timeToWallUnstick = wallStickTime;
-            }
+            
         }
     }
 }

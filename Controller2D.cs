@@ -6,6 +6,7 @@ public class Controller2D : RaycastController
 {
     public float maxClimbAngle = 70;
     public float maxDescendAngle = 70;
+    Player player;
 
     [HideInInspector]
     public Vector2 playerInput;
@@ -18,6 +19,7 @@ public class Controller2D : RaycastController
     {
         base.Start();
         collisions.faceDir = 1;
+        player = GetComponent<Player>();
     }
 
     // platform move
@@ -62,7 +64,6 @@ public class Controller2D : RaycastController
     void HorizontalCollisions(ref Vector2 velocity)
     {
         float directionX = collisions.faceDir;
-        print("directionX: " + directionX);
         float rayLength = Mathf.Abs(velocity.x) + skinWidth;
 
         if (Mathf.Abs(velocity.x) < skinWidth)

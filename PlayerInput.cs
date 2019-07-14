@@ -33,5 +33,9 @@ public class PlayerInput : MonoBehaviour
         {
             player.Dash();
         }
+        if (Input.GetKeyDown(KeyCode.Mouse1))
+        {
+            player.Grapple();
+        }
     }
 }
